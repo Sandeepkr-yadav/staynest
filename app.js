@@ -89,6 +89,11 @@ app.delete("/listings/:id",async(req, res)=>{
 app.get("/", (req, res)=>{
     res.send("Hi, I am root");
 })
+
+app.get("/home", (req, res)=>{
+    res.send("Hi, I am root");
+})
+
 app.listen(8080, ()=>{
     console.log(`server is listening on port 8080`);
 });
