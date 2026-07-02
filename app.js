@@ -1,18 +1,20 @@
 const express = require("express");
 const app = express();
-app.use(express.urlencoded({ extended: true }));
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
-app.set("view engine", "ejs");
 const path = require("path");
-app.set("views", path.join(__dirname,"views"));
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust"; 
 const ejsMate = require("ejs-mate");
-app.engine("ejs", ejsMate);
-app.use(express.static(path.join(__dirname, "/public")));
 const wrapAsync = require("./utils/wrapAsync.js");
+const {listingSchema} = require("./schema");
 const ExpressError = require("./utils/ExpressError.js");
 const methodOverride = require("method-override");
+
+app.use(express.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname,"views"));
+app.engine("ejs", ejsMate);
+app.use(express.static(path.join(__dirname, "/public")));
 app.use(methodOverride("_method"));
 
 main()
@@ -38,7 +40,15 @@ async function main() {
 //     res.send("data stored !")
 // });
 
-
+const validateListing = (req, res, next) => {
+    let { error } = listingSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    } else {
+        next();
+    }
+};
 
 // Index Routes
 app.get("/listings", wrapAsync(async(req, res)=>{
@@ -60,10 +70,7 @@ app.get("/listings/:id", wrapAsync(async(req,res)=>{
 }));
 
 //Create route
-app.post("/listings", wrapAsync(async(req, res, next)=>{
-        if(!req.body.listing) {
-            throw new ExpressError(400, "send valid data for listings");
-        }
+app.post("/listings",validateListing, wrapAsync(async(req, res, next)=>{
         const newListing = new Listing(req.body.listing);
         await newListing.save();
         res.redirect("/listings");
@@ -78,7 +85,7 @@ app.get("/listings/:id/edit",wrapAsync(async(req,res)=>{
 }));
 
 // Update Route 
-app.put("/listings/:id", wrapAsync(async(req, res)=>{
+app.put("/listings/:id",validateListing, wrapAsync(async(req, res)=>{
      let {id}= req.params;
      await Listing.findByIdAndUpdate(id, {...req.body.listing});
      res.redirect(`/listings/${id}`);
@@ -103,7 +110,8 @@ app.all("/{*splat}", (req, res, next) => {
 
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
-    res.status(statusCode).send(message);
+    res.status(statusCode).render("error.ejs", {message});
+   // res.status(statusCode).send(message);
 });
 
 app.listen(8080, ()=>{
