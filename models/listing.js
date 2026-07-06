@@ -15,8 +15,8 @@ const listingSchema = new Schema({
     },
         url: {
         type: String,
-        default: "https://unsplash.com/photos/red-rose-with-droplets-gcWd0ts4RCo",
-        set: (v) => (v === "" ? "https://unsplash.com/photos/red-rose-with-droplets-gcWd0ts4RCo" : v),
+        default: "https://images.unsplash.com/photo-1549294413-26f195200c16?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8aG90ZWx8ZW58MHx8MHx8fDA%3D",
+        set: (v) => (v === "" ? "https://images.unsplash.com/photo-1549294413-26f195200c16?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8aG90ZWx8ZW58MHx8MHx8fDA%3D" : v),
     },
 },   
     price : Number,
